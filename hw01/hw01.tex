@@ -1,0 +1,360 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage,latexsym,amsthm,latexsym,amssymb}
+\usepackage{amstext,amsfonts,amsmath,graphicx}
+\usepackage{multicol}
+\usepackage[usenames,dvipsnames]{color} 
+\usepackage{tikz}
+\usepackage{graphicx}
+
+\oddsidemargin = -0.5 in
+\addtolength{\textwidth}{0.8in}
+\addtolength{\textheight}{0.2in}
+
+%% Theorem statements %% 
+% THEOREMS -------------------------------------------------------
+\newtheorem{theorem}{Theorem}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\numberwithin{equation}{section}
+%% MISC DEFINITIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\qtrinfo}{CS/ECE 498 AC 3/4 Fall 2020}
+\newcommand{\remove}[1]{}
+\newcommand{\headnote}{
+\begin{multicols}{2}\small
+\begin{itemize}
+\item
+Please write your name, UID, \textbf{and the names of anyone you
+collaborated with} in the spaces provided and attach this sheet to the
+front of your solutions.
+\item Please write your answers in a neat and readable hand-writing. \textbf{Each answer should be on a separate page.}
+\item Always explain your answers. When a proof is requested, you should provide a rigorous proof.
+\item 10\% of the points will be given if your answer is ``I don't know''. 
+However, if instead of writing ``I don't know'' you write things that do not make any sense, no points will be given.
+\item The homework is expected to take anywhere between 8 to 12 hours. Start early. 
+\item \emph{Throughout this course, whenever you are required to ``Show that'' some statement is true, a complete and rigorous proof is expected.}
+\end{itemize}
+\end{multicols}
+}
+
+
+\newcommand{\hwhead}[2]{
+	\raggedleft{Name: \underline{Zhiqi Cheng} \\ \medskip
+              UID: \underline{678676902} \\ \medskip
+              Collaborators: \underline{Yiran Li} \\ \medskip}
+  \bigskip
+  \center{\LARGE{\qtrinfo \ -- Problem Set #1}}
+  \center{\Large{Due #2}}
+  \bigskip
+  
+  \raggedright
+  \headnote
+  \smallskip
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\addtolength{\topmargin}{-1cm}
+\addtolength{\textheight}{2cm}
+
+\begin{document}
+\hwhead{1}{Thursday, September 17, 6pm (Submit via Gradescope)}
+
+
+\paragraph{Honor Code (READ CAREFULLY).}
+When submitting my solution set, I agree to follow the following rules concerning homework and problem sets:
+\begin{itemize}
+\item	When formulating an approach to the problems I am given, I am allowed to ask the TA for help, and to collaborate with my fellow UIUC students, and I will acknowledge in writing the names of every student that I collaborated with on my work.
+I understand that collaboration and study groups are encouraged. My grade will not suffer if I acknowledge help from other students, but may suffer if I collaborate without explicit acknowledgement.
+\item	When writing solutions, I will do so on my own, without the help of any other person or any other student’s notes or solutions. 
+\item	Since the primary purpose of this course is to teach me new ways of thinking and to give me experience in attacking problems and formulating proofs, I will not seek out or make use of any outside source of information, including but not limited to: any information found online (except on the course website), other textbooks or articles.  If necessary, I may ask for permission in advance from the TA to deviate from this rule.  
+The textbook for the course (Boneh-Shoup) and my own notes are excepted from this rule.  
+\item I understand that I may be suspended from UIUC for violating this honor code.
+\item	If I have difficulty with understanding lectures or the book due to difficulty with the English language, or if someone asks for my help because of difficulties with language, I will discuss the situation with the professor or TA as soon as possible, to ensure that the honor code is upheld.	I will follow these rules in good faith, and not try to find “loopholes” that violate the spirit of the rules.  If I am unsure about what the spirit of the rule is or what a rule means, then I will ask for clarification from the professor or the TA, and I will adhere to the rules as clarified.
+\end{itemize}
+
+
+
+
+\begin{enumerate}
+
+\item 
+{\bf Perfect Secrecy (10 points).} In class we defined perfect security for any private-key encryption scheme $(E, D)$ as follows. 
+
+{\bf Def. 1:} For every pair of messages $m_0, m_1 \in \mathcal{M}$ and for every ciphertext $c \in \mathcal{C}$, we have:
+$$\Pr_{k \leftarrow \mathcal{K}} [E(k,m_0) = c] = \Pr_{k \leftarrow \mathcal{K}} [E(k,m_1) = c]$$
+
+An alternative definition of perfect secrecy is:\\
+{\bf Def. 2:} Fix any ciphertext $c \in \mathcal{C}$. Then for {\em any} probability distribution $\mathbb{M}$ over the set of messages, and any message $m$ in the support of this distribution, i.e. $m \in \mathsf{Supp}(\mathbb{M})$, we have:
+$$\Pr_{k \leftarrow \mathcal{K}, m' \leftarrow \mathbb{M}} [m' = m|E(k, m') = c] = 
+\Pr_{k \leftarrow \mathcal{K}, m' \leftarrow \mathbb{M}} [m' = m]$$
+%
+Prove that the two definitions are equivalent. {\small \emph{(show that Def. 1 implies Def. 2 and vice-versa.)}}
+
+Answer:
+
+Def. 1 $\rightarrow$ Def. 2:
+\begin{flalign*}
+    \Pr_{k \leftarrow \mathcal{K}, m' \leftarrow \mathbb{M}} [m' = m|E(k, m') = c]
+    &=\frac{\Pr_{k, m'}[m=m'\cap E(k, m')=c]}{\Pr_{k,m'}[E(k, m')=c]}\\
+    &=\frac{\Pr_{k, m'}[m=m'\cap E(k, m)=c]}{\Pr_{k,m'}[E(k, m')=c]}\\
+    &=\frac{\Pr_{m'}[m=m']\Pr_k [E(k, m)=c]}{\Pr_{k,m'}[E(k, m')=c]}\\
+    &=\Pr_{m'}[m=m']\cdot\frac{\Pr_k [E(k, m)=c]}{\Pr_{k,m'}[E(k, m')=c]}
+\end{flalign*}
+Now we want to show $\frac{\Pr_k [E(k, m)=c]}{\Pr_{k,m'}[E(k, m')=c]}=1$, ie. $\Pr_k [E(k, m)=c]=\Pr_{k,m'}[E(k, m')=c]$.
+\begin{flalign*}
+    \Pr_{k, m'} [E(k, m')=c]
+    &=\sum_{m''\in \mathbb{M}}\Pr_{m'}[m'=m'']\Pr_k [E(k, m'')=c]\\
+    &=\sum_{m''\in \mathbb{M}}\Pr_{m'}[m'=m'']\Pr_k [E(k, m)=c]\mbox{ (by Def. 1)}\\
+    &=\Pr_k [E(k, m)=c] \sum_{m''\in \mathbb{M}}\Pr_{m'}[m'=m'']\\
+    &=\Pr_k [E(k, m)=c]
+\end{flalign*}
+Def. 2 $\rightarrow$ Def. 1:
+
+We want to show $\Pr_{k \leftarrow \mathcal{K}} [E(k,m_0) = c] = \Pr_{k \leftarrow \mathcal{K}} [E(k,m_1) = c]$. So we fix $m_0, m_1, c$ and let $D$ be the uniform distribution over $\{m_0, m_1\}$ so that $\Pr_m[m=m_0]=\Pr_m[m=m_1]=\frac{1}{2}$.
+
+By definition, this scheme is Shannon secure. Therefore,
+\begin{equation*}
+    \Pr_{k,m}[m=m_0|E(k,m)=c]=\Pr_m[m=m_0]=\Pr_m[m=m_1]=\Pr_{k,m}[m=m_1|E(k,m)=c]
+\end{equation*}
+\begin{flalign*}
+    \Pr_{k,m}[m=m_0|E(k,m)=c]
+    &=\frac{\Pr_{k, m}[m=m_0\cap E(k, m)=c]}{\Pr_{k,m}[E(k, m)=c]}\\
+    &=\frac{\Pr_{k, m}[m=m_0\cap E(k, m_0)=c]}{\Pr_{k,m}[E(k, m)=c]}\\
+    &=\frac{\Pr_m[m=m_0]\Pr_k[E(k, m_0)=c]}{\Pr_{k,m}[E(k, m)=c]}\\
+    &=\frac{\frac{1}{2}\Pr_k[E(k, m_0)=c]}{\Pr_{k,m}[E(k, m)=c]}\\
+\end{flalign*}
+Similarly,
+\begin{equation*}
+    \Pr_{k,m}[m=m_1|E(k,m)=c]=\frac{\frac{1}{2}\Pr_k[E(k, m_1)=c]}{\Pr_{k,m}[E(k, m)=c]}=\frac{\frac{1}{2}\Pr_k[E(k, m_0)=c]}{\Pr_{k,m}[E(k, m)=c]}
+\end{equation*}
+Therefore,
+\begin{equation*}
+    \Pr_{k \leftarrow \mathcal{K}} [E(k,m_0) = c] = \Pr_{k \leftarrow \mathcal{K}} [E(k,m_1) = c]
+\end{equation*}
+Thus, the two definitions are equivalent.
+
+$QED$
+
+\newpage
+\item 
+{\bf Pseudorandom Functions (10 points).} 
+Let F be a secure PRF defined over $(\mathcal{K}, \mathcal{X} , \mathcal{Y})$, where $\mathcal{K} = \mathcal{X} = \mathcal{Y} = \{0, 1\}^n$.
+\begin{enumerate}
+\item  Show that $F_1 \big( (k_1||k_2), (x_1||x_2) \big) := F(k_1, x_1) \oplus F(k_2, x_2)$ is not a secure PRF. 
+
+That is, show an adversary $A_1$ on $F_1$ that has non-negligible advantage in distinguishing $F_1(k, \cdot)$ from a random function that maps $X^2$ bits to $Y$ bits.
+\item Show that $F_2(k, x) := F(k, x) || F(k, F(k, x))$ is not a secure PRF.
+\item Prove that $F_3(k, x) := F(k, x) \oplus x$ is a secure PRF. 
+
+Do so by proving the contrapositive:
+show that if adversary $A_3$ can distinguish $F_3(k, \cdot)$ from a random function then there is $B$ (that is a wrapper around $A_3$) that can distinguish $F$ from a random function.
+This $B$ will play the role of challenger to $A_3$, and attack $F$.
+\end{enumerate}
+Answer:
+\begin{enumerate}
+    \item There is an adversary that does the following to distinguish $F_2$ from a random function (all $x_i$ are different messages randomly chosen from the message space):
+    \begin{enumerate}
+        \item Send $(x_1||x_2)$ to $F_1$ and get $c_1 = F(k_1, x_1) \oplus F(k_2, x_2)$.
+        \item Send $(x_3||x_2)$ to $F_1$ and get $c_2 = F(k_1, x_3) \oplus F(k_2, x_2)$.
+        \item Send $(x_1||x_4)$ to $F_1$ and get $c_3 = F(k_1, x_1) \oplus F(k_2, x_4)$.
+        \item Send $(x_3||x_4)$ to $F_1$ and get $c_4 = F(k_1, x_3) \oplus F(k_2, x_4)$.
+        \item If $c_1 \oplus c_2 = c_3 \oplus c_4$, output 0; otherwise, output 1.
+    \end{enumerate}
+    Because
+    \begin{equation*}
+        c_1 \oplus c_2 = F(k_1, x_1) \oplus F(k_2, x_2) \oplus F(k_1, x_3) \oplus F(k_2, x_2) = F(k_1, x_1) \oplus F(k_1, x_3)
+    \end{equation*}
+    whereas
+    \begin{equation*}
+        c_3 \oplus c_4 = F(k_1, x_1) \oplus F(k_2, x_4) \oplus F(k_1, x_3) \oplus F(k_2, x_4) = F(k_1, x_1) \oplus F(k_1, x_3)
+    \end{equation*}
+    $c_1 \oplus c_2$ will be equal to $c_3 \oplus c_4$ in $F_1$.
+    Therefore $F_1$ is not a secure PRF.
+    \item There is an adversary that does the following to distinguish $F_2$ from a random function:\\
+    \begin{enumerate}
+        \item Send arbitrary $x$ to $F_2$ and take the output $c_1 = F(k, x) || F(k, F(k, x))$.
+        \item Send $F(k, x)$ to $F_2$ and take the output $c_2 = F(k, F(k, x)) || F(k, F(k, F(k, x)))$.
+        \item If the first half of $c_2$ matches the second half of $c_1$, we output 0; otherwise, we output 1.
+    \end{enumerate}
+    Therefore, $F_2$ is not a secure PRF.
+    \item For the sake of contradiction, suppose there is an adversary $A_3$ that can distinguish $F_3$ from a random function. Then there is $B$ that does the following to distinguish $F$ from a random function:
+    \begin{enumerate}
+        \item Take the message $x$ from $A_3$ and forward to $F$.
+        \item Take the output $c$ from $F$ and forward $c \oplus x$ to $A_3$
+        \item Repeat until $A_3$ decides and output $A_3$'s output.
+    \end{enumerate}
+    Therefore, $B$ is able to distinguish $F$ from a random function, contradicting $F$ is a secure PRF. So $F_3$ is a secure PRF.
+    
+    $QED$
+\end{enumerate}
+
+
+
+\newpage
+\item {\bf Double Encryption (10 points).}
+Let $\Phi = (E, D)$ be a cipher. Consider $\Phi_2 = (E_2, D_2)$, where $E_2(k, m) = E(k, E(k, m))$. 
+One would expect that if encrypting a message once as in $\Phi$ is secure then
+encrypting it twice as in $\Phi_2$ should be no less secure. 
+However, this is not always true.
+\begin{enumerate}
+\item {\bf Show that there is a {\em one-time} semantically secure cipher $\Phi$ such that $\Phi_2$ is not {\em one-time} semantically secure.}
+Recall that in the case of one-time semantic security, the encryptions $\left( E(k,m_0), E(k,m_1) \right)$ of every pair $(m_0,m_1)$ are required to be indistinguishable. 
+\item {\bf Prove that for every {\em many-time adaptive} CPA secure cipher $\Phi$, the cipher $\Phi_2$ is also {\em many-time} CPA secure. }
+In the setting of many-time adaptive CPA security, the adversary interacts with a challenger, in a pair of imagined Games. In $\mathsf{Game}_b$, the adversary sends a pair of messages $(m_0^i, m_1^i)$ at every step $i$, and receives $c_i = E(k, m_b^i)$ in return. Upon obtaining $c_i = E(k, m_b^i)$, the adversary may request encryptions of another pair $(m_0^{i+1}, m_1^{i+1})$, or may output its guess for the bit $b$. The requirement is as usual: we require that for every PPT attacker A, there exists a negligible function $\epsilon(\cdot)$ such that
+$$\left| \Pr[A = 1 |\mathsf{Game}_0] - \Pr[A = 1 |\mathsf{Game}_1] \right| = \epsilon(\kappa).$$
+{\small (Hint: As usual prove that for every CPA adversary A attacking $\Phi_2$ there is a CPA adversary B attacking $\phi$. Adversary B uses A as a black box – it plays the role of CPA challenger to A with respect to $\Phi_2$. It uses A to win the CPA game against its own challenger with respect to $\Phi$.)}
+\end{enumerate}
+Answer:
+\begin{enumerate}
+    \item Let $\Phi$ be OTP. ie. $E(k, m) = k \oplus m$.
+    \newline
+    As shown in class, OTP is one-time semantically secure.
+    However, $\Phi_2$ undoes the encryption. ie.
+    \begin{equation*}
+        E(k, E(k, m)) = k \oplus k \oplus m = m
+    \end{equation*}
+    Therefore, the adversary can tell which message is which by simply comparing the "ciphertext" with the plaintext. So $\Phi_2$ is not one-time semantically secure.
+    \item For the sake of contradiction, assume there is an adversary $A$ that can distinguish $\Phi_2$ from a random function. Then we can construct an adversary B that can distinguish $\Phi$ from a random function as follows:
+    \begin{enumerate}
+        \item Take the message $m$ from $A$ and forward to $\Phi$.
+        \item Take the output of $\Phi$ and send it back to $\Phi$.
+        \item Take the second output and forward to $A$.
+        \item Repeat until $A$ decides and take its output as output.
+    \end{enumerate}
+    Therefore, $B$ is able to distinguish $\Phi$ from a random function, contradicting that $\Phi$ is a many-time adaptive CPA secure cipher. Therefore, $\Phi_2$ is many-time CPA secure.
+    
+    $QED$
+\end{enumerate}
+
+
+
+\newpage
+\item {\bf Merkle Trees (10 points).}
+Recall that the Merkle-Damgard construction gives a sequential method for extending the domain of a CRHF. The tree construction in the figure below is a parallelizable approach: all the hash functions $h$ within a single level can be computed in parallel. 
+Here $h$ is a compression function
+$h : X^2 \rightarrow X$, and we assume the message length can be encoded as an element of $X$.
+More precisely, the hash function is defined as follows: 
+
+\includegraphics{merkle}
+
+{\bf Input:} $m_1, \ldots, m_s \in X_s$ for some $1 \leq s \leq L$.\\
+{\bf Output:} $y \in X$.\\
+Let $t \in Z$ be the smallest power of two such that $t \geq s$ (i.e., $t := 2^{\lceil \mathsf{log} s \rceil})$ \\
+for $i = s + 1$ to $t$: $m_i \leftarrow \bot$\\
+for $i = t + 1$ to $2t - 1$:\\
+~~~~~~~~~~$\ell \leftarrow 2(i - t) - 1, r \leftarrow \ell + 1$ \text{ ~~~~~~~~~// indices of left and right children}\\
+~~~~~~~~~~if $m_\ell = \bot$ and $m_r = \bot : m_i \leftarrow \bot$ \text{ ~// if node has no children, set node to null}\\
+~~~~~~~~~~else if $m_r = \bot: m_i \leftarrow m_\ell$ ~~~~~~~~~~~~// if one child, propagate child as is\\
+~~~~~~~~~~else $m_i \leftarrow h(m_\ell, m_r)$ ~~~~~~~~~~~~~~~~~~// if two children, hash with $h$\\
+output $y \leftarrow h (m_{2t-1},s)$ ~~~~~~~~~~~~~~~~~~~~~~~~// hash final output and message length
+
+%\vspace{-5mm}
+
+\begin{enumerate}
+\item Prove that the resulting hash function defined over $(X^{\leq L}, X )$ is collision resistant, assuming $h$ is collision resistant. 
+\item Show that if the msg-len block is eliminated (e.g. the contents of that block is
+always set to 0) then the construction is not collision resistant.
+\end{enumerate}
+Answer:
+\begin{enumerate}
+    \item For the sake of contradiction, suppose we have two distinct messages $m_0, m_1$ whose hashes are the same. ie. $m_0 \ne m_1$ but $H(m_0) = H(m_1)$. Then there are two distinct Merkle hash trees $T_0$ and $T_1$ whose outputs are the same.
+    
+    Now, if the top block or msg-len to the root compression function $h$ are different, then we have found a collision in $h$, contradicting that $h$ is collision resistant.
+    
+    If the top blocks and msg-len are the same, we can examine from top to bottom, left to right, in the Merkle tree to find a collision in $h$. If at i-th level the inputs to $h$ are different but outputs are the same, then we have found a collision. Otherwise, we go down to (i+1)-th level.
+    
+    Because the $m_0 \ne m_1$, we are guaranteed to find a collision, where inputs to $h$ are distinct but the outputs are the same. And there is a contradiction.
+    
+    Therefore, the resulting hash function is collision resistant.
+    
+    $QED$
+    \item If the msg-len field is eliminated, then we can construct a collision as follows:
+    \begin{enumerate}
+        \item Choose a random message $m_0$ of length $2^x$.
+        \item Construct another message $m_1$ by replacing every two blocks in $m_0$ with their $h$ hash value. ie. $m_1^i=h(m_0^{2i}, m_0^{2i+1})$
+    \end{enumerate}
+    Because $m_1$ will produce the exact same Merkle tree except with depth $(x-1)$. Therefore, the hash of $m_0$ and $m_1$ will be identical, but $m_0 \ne m_1$. So the construction is not collision resistant.
+\end{enumerate}
+
+\newpage
+\item {\bf Flawed MACs (10 points).} 
+Suppose Alice and Bob share a secret key $k$. 
+A simple proposal for a MAC
+algorithm, that does not impose any upper bound on the length of input messages, is as follows -- given a message $M$ do: 
+(1) compute 128 different parity bits
+of $M$ (i.e. compute the parity of 128 different subsets of the bits of $M$), and (2) AES
+encrypt the resulting 128-bit checksum using $k$. 
+
+Naively, one could try to argue that this MAC is secure: one could try to say that without knowing $k$ an attacker cannot create a valid message-MAC pair. 
+Show that this proposal is flawed. Note that the algorithm for computing the 128-bit checksums is public, i.e. the only secret unknown to the attacker is the key $k$.
+{\small (Hint: show that an attacker can carry generate a new (different) message/tag pair given just one valid message/tag pair.)}
+
+Answer:
+
+Given the checksum algorithm is public and not collision resistant, we can construct a forgery message/tag pair as follows:
+\begin{enumerate}
+    \item Generate a random message $m_0$ and ask for tag $t_0$.
+    \item Construct $m_1$ by modifying some of the subsets of bits in $m_0$ s.t. the parity bits remain the same. This is easy given there are only two possibilities for each parity bit.
+    \item Output the message/tag pair ($m_1$, $t_0$).
+\end{enumerate}
+Since $m_0$ and $m_1$ have the same parity bits, $V(k, m_1, t_0)$ would output accept because it only verifies the parity bits. But $m_0 \ne m_1$. So this proposal is flawed.
+
+\newpage
+\item {\bf A Bad Cipher: Many-Time Pad (10 points).}
+Each word of ascii plaintext has been encrypted by XORing with the same randomly generated key pad, then encoded in hex. Your task is to decrypt as much of it as possible.
+
+{\fontfamily{qcr}\selectfont
+fbd3e7f8ce13d4 f8d9 edc6fbf7c81bd5 efc4f2ebd511d6b532d41bd0\newline \newline
+edc5 fcd7f9ef e3d0 f8dee2e8 efd9fee9d21b f5d9fe fbdfe7f7 e0d3eae9cf e4d9fc f8d9 fcc4e4edc4 f8deee ffd3e8eed317c5be e3d0 efc4f2ebd511d6b532d41bc033 fcc4e2f6c80ad8b136d7\newline \newline
+fbd3 e4d9fbfe f8deeaef f5d9fe f8d7e0fe edc1eae2 fad7e7eec01cdda2 e5d8f8f2c616c5 edc5 f8d9 fbdeeaef e1d7e0fed2 ffcff8efc413c2 fcc4e4edc01cddbe ffd3e8eed31b\newline \newline
+edc5 ed fed3e6f2cf1ad4b5 fcdaeefad21b f8d7e0fe efd7f9fe e3d0 f5d9fee9 e4d3eaf7d516\newline \newline
+e5d0 f5d9fe e4d7fdfe edd8f2 efd9e5fdcd17d2b320 fbdffff3 e9ceeaf6 f8dfe6fed2 e3c4 e4d9e6fed611c3ac e8d3eaffcd17dfa220 fcdaeefad21b fed3eaf8c9 e3c3ff f8d9 f9c5 ffd9 fbd3 efd7e5 e3c6eef5 e8dff8f8d40dc2ae3cca00 e3d8 edc6fbe9ce0ec3ae32d016 edd5e8f4cc13dea332d01ac63efd\newline \newline
+f8deeaf5ca f5d9fe ead9f9 fcd7f9efc81dd8b732d01ac737 e8c3f9f2cf19 e0d3e8efd40cd4b4 edd8ef edc5e0f2cf19 e5d8f8f2c616c5a126c8 fdc3eee8d517dea920 e3d8 fcdfeae1db1f}\newline\newline
+%
+For reference, the cipher was generated using the following code.\newline\newline
+%
+{\fontfamily{qcr}\selectfont
+import os\\
+MSGS = open(``hw1-message.txt'').readlines()\\
+new-MSGS = [message.split() for message in MSGS]\\
+def bytexor(a, b):     \# xor two byte arrays (trims the longer input)\\
+    return bytes([x \^\ y for (x,y) in zip (a,b)])\\
+def random(size=16):\\
+    return os.urandom(size)\\
+def encrypt(key, msg): \\
+    c = bytexor(key, msg) \\
+    return c\\
+def main():\\
+    key = random(1024) \\
+    ciphertexts = [" ".join([encrypt(key, word.encode(`utf-8')).hex() for word in msg]) for msg in new-MSGS] \\
+    $[$print(ciphertext) for ciphertext in ciphertexts$]$ \\
+    return ciphertexts\\
+if \_\_name\_\_=='\_\_main\_\_': \\
+    main()
+}\newline \newline
+
+For this question, please write down the decrypted plaintext in the space provided below, {\em and additionally submit any code you wrote to decrypt this ciphertext, to Gradescope.} Your code should be named hw1-sol.py.
+\end{enumerate}
+welcome to applied cryptography
+
+as part of this course you will learn how to prove the security of cryptographic primitives
+
+we hope that you take away valuable insight as to what makes systems provably secure
+
+as a reminder please take care of your health
+
+if you have any conflicts with exam times or homework deadlines please reach out to us so we can open discussions on appropriate accommodation
+
+thank you for participating during lectures and asking insightful questions on piazza
+
+\vspace*{\fill}
+
+\hrule
+
+\paragraph{Feedback.} Did you find the homework assignments too easy/too hard/just right? How is the pace of the course so far? Please add any feedback that would help improve the course.
+\newline
+
+Have less problems please! And have future assignments due at midnight please!
+
+\paragraph{Acknowledgement:} Some questions are inspired by problems in the Boneh-Shoup textbook and Boneh's course.
+\end{document}
