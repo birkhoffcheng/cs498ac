@@ -1,0 +1,215 @@
+\documentclass[12pt]{article}
+\usepackage{mdframed}
+\usepackage{fullpage,latexsym,amsthm,latexsym,amssymb}
+\usepackage{amstext,amsfonts,amsmath,graphicx}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{palatino}
+
+
+\oddsidemargin = -0.5 in
+\addtolength{\textwidth}{0.8in}
+\addtolength{\textheight}{0.2in}
+
+%% Theorem statements %%
+% THEOREMS -------------------------------------------------------
+\newtheorem{theorem}{Theorem}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\numberwithin{equation}{section}
+%% MISC DEFINITIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\qtrinfo}{CS/ECE 498 AC 3/4 Fall 2020}
+\newcommand{\remove}[1]{}
+\newcommand{\headnote}{
+\begin{multicols}{2}\small
+\begin{itemize}
+\item {\bf You can choose to solve either (Problem 1 only) or (all of Problems 2-4).} If you attempt all problems (1-4), we will take the highest score between the two options.
+
+\item
+Please write your name, UID, \textbf{and the names of anyone you
+collaborated with} in the spaces provided and attach this sheet to the
+front of your solutions.
+\item Please write your answers in a neat and readable hand-writing. \textbf{Each answer should be on a separate page.}
+\item Always explain your answers. When a proof is requested, you should provide a rigorous proof.
+\item 10\% of the points will be given if your answer is ``I don't know''.
+However, if instead of writing ``I don't know'' you write things that do not make any sense, no points will be given.
+\item The homework is expected to take several ($\geq 10$) hours. Start early.
+\end{itemize}
+\end{multicols}
+}
+
+
+\newcommand{\hwhead}[2]{
+	\raggedleft{Name: \underline{\hspace{3in}} \\ \medskip
+              UID: \underline{\hspace{3in}} \\ \medskip
+              Collaborators: \underline{\hspace{3in}} \\ \medskip}
+  \bigskip
+  \center{\LARGE{\qtrinfo \ -- Problem Set 2}}
+  \center{\Large{Due #2}}
+  \bigskip
+
+  \raggedright
+  \headnote
+  \smallskip
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\addtolength{\topmargin}{-1cm}
+\addtolength{\textheight}{2cm}
+
+\begin{document}
+\hwhead{2}{Monday, October 12, 6pm (Submit via Gradescope)}
+
+
+\paragraph{Honor Code (READ CAREFULLY).}
+When submitting my solution set, I agree to follow the following rules concerning homework and problem sets:
+\begin{itemize}
+\item	When formulating a high-level approach to the problems I am given, I am allowed to ask the TA for help, and to collaborate with my fellow UIUC students, and I will acknowledge in writing the names of every student that I collaborated with on my work.
+I understand that collaboration and study groups are encouraged. My grade will not suffer if I acknowledge help from other students, but may suffer if I collaborate without explicit acknowledgement.
+\item	When writing solutions or code, I will do so entirely on my own, without the help of any other person or any other student’s notes or solutions or code. I will not discuss implementation details with other students.
+\item	I will not seek out or make use of any outside source of information, except sources explicitly linked to in the exam. Outside sources include but are not limited to: any information found online (except on the course website or linked in the homework), other textbooks or articles.  If necessary, I may ask for permission in advance from the TA to deviate from this rule.
+The textbook for the course (Boneh-Shoup) and my own notes are excepted from this rule.
+\item I understand that I may be suspended from UIUC for violating this honor code.
+\item	If I have difficulty with understanding lectures or the book due to difficulty with the English language, or if someone asks for my help because of difficulties with language, I will discuss the situation with the professor or TA as soon as possible, to ensure that the honor code is upheld.	I will follow these rules in good faith, and not try to find “loopholes” that violate the spirit of the rules.  If I am unsure about what the spirit of the rule is or what a rule means, then I will ask for clarification from the professor or TA, and I will adhere to rules as clarified.
+\end{itemize}
+
+
+
+
+\begin{enumerate}
+
+
+\item
+{\bf Bleichenbacher Attack on PKCS\#1 (60 points).}
+An RSA-PKCS\#1 encryption of a message $m \in \{0,1\}^n$ under an RSA public key $(N,e)$ is formed by first constructing the padded message
+$x \gets 00\Vert 02\Vert r\Vert 00\Vert m \in \mathbb{Z}_N$ where $r$ consists of a sequence of random non-zero bytes, and then computing
+$c \gets x^e \in \mathbb{Z}_N$. This scheme was used in the SSL 3.0 handshake.
+
+Specifically, in the SSL 3.0 handshake, the client chooses a random ``pre-master secret'' $k$ (used to
+derive the session keys) and encrypts $k$ using RSA-PKCS\#1 under the server’s public key to obtain a
+ciphertext $c$. Upon receiving the encrypted key $c$, the server attempts to decrypt the message; if the
+decryption yields a message that is not a well-formed PKCS\#1 message, the server sends an abort message
+to the client, and otherwise, it continues with the handshake. In this problem, we will say that a valid
+PKCS\#1 ciphertext is one that starts with the two-byte sequence $00\Vert 02$.\footnote{In practice, PKCS\#1 will also check that the header is followed by sufficiently-many non-zero padding bytes, but for simplicity
+in this problem, we will ignore this detail and only require checking the first two bytes.} Bleichenbacher showed that this
+single bit of leakage (via a “padding oracle”) can be leveraged to mount a full key-recovery attack against
+SSL 3.0. In this problem, you will implement this attack.
+
+Bleichenbacher's attack is described in Section 3.1 of this paper: \url{http://archiv.infsec.ethz.ch/education/fs08/secsem/bleichenbacher98.pdf}. 
+	
+	We have provided starter code here (\url{https://courses.grainger.illinois.edu/cs498ac3/fa2020/Files/bleichenbacher.z.zip}) that contains a basic implementation of RSA-PKCS\#1 encryption (see \texttt{main.py}). Your objective is to implement Bleichenbacher’s attack described in Section 3.1 of the paper. In particular, your algorithm should be able to decrypt an intercepted RSA-PKCS\#1 ciphertext given knowledge of only the public key $(N,e)$ and access to the following padding oracle:
+	\begin{mdframed}
+		On input a ciphertext $c \in \mathbb{Z}_N$, the padding oracle outputs $1$ if $c^d \in \mathbb{Z}_N$ is a valid PKCS\#1 message (starts with the two-byte sequence $00\Vert 02$) and $0$ otherwise
+	\end{mdframed}
+	In our starter code, we use a 128-bit RSA modulus (which is easily factored), but your implementation should also support a 1024-bit RSA modulus with several minutes of computation (factoring a general 1024-bit modulus is well beyond the reach of current techniques). Your task is to implement the decrypt method in $\texttt{bleichenbacher.py}$. You should not change the interface for $\texttt{\_\_init\_\_}$ or decrypt; otherwise, you are free to implement the algorithm however you prefer (using standard Python libraries). Your code will be evaluated only for correctness (so if you prefer a different approach to breaking RSA-PKCS\#1, such as factoring the modulus, that is also acceptable\footnote{Indeed, if you break the 1024-bit scheme via a factoring algorithm, you will automatically receive an ``A+'' (and probably throw in a Ph.D. too).}). Some helper functions are provided in $\texttt{util.py}$. For the submission, please upload your code (consisting of only $\texttt{bleichenbacher.py}$ to Gradescope under Homework\_2\_code). Note that your implementation must work with our provided $\texttt{main.py}$ and $\texttt{util.py}$.
+
+
+\vspace*{\fill}
+
+\textcolor{red}{If you attempted this problem (i.e. Problem 1), you can stop here and do not need to attempt Problems 2 - 5. Alternatively, you can choose to Skip Problem 1 and attempt Problems 2-5.}
+
+
+
+
+\newpage
+
+
+
+
+\item
+{\bf Baby Bleichenbacher with $N=pq$ (20 points).} In this problem, we will explore a simplified variant of Bleichenbacher's CCA attack against PKCS\#1 encryption. Let $(N,e)$ be the public-key for an RSA-based encryption scheme, where $N = pq$ is a product of two primes and e is invertible modulo $\phi(N)$ (i.e., there exists $d$ such that $ed = 1 \pmod{\phi(N)}$. For $x \in \mathbb{Z}_N$, define the function $f_x : \mathbb{Z}_N \to \{0,1\}$ where $f_x (r ) = 1$ if the value of $x \cdot r \pmod{N}$ is greater than $N/2$ (where we view $x \cdot r \pmod{N}$ as an integer between $0$ and
+$N-1$), and $0$ otherwise.
+\begin{enumerate}
+	\item {\bf (10 points.)} Construct an algorithm that given $O(\log N)$ queries to $f_x$ recovers the value of $x \in \mathbb{Z}_N$. Your algorithm can make arbitrary queries to $f_x$. Prove the correctness of your algorithm.
+	\item {\bf (10 points.)} Suppose an adversary has intercepted an RSA ciphertext $c \in \mathbb{Z}_N$ where $c = x^e \pmod{N}$ for some $x \in \mathbb{Z}_N$. Moreover, suppose the adversary has access to a ``partial'' decryption oracle that takes as input $z \in \mathbb{Z}_N$ and outputs $1$ if $z^d \pmod{N}$ is greater than $N/2$ (where we view $z^d \pmod{N}$ as an integer between $0$ and $N-1$), and $d = e^{-1} \pmod{\phi(N)}$ is the RSA decryption key. Use your result from Part (a) to show how the adversary can decrypt c to obtain the message x by making $O(\log N)$ queries to this partial decryption oracle.
+\end{enumerate}
+
+
+\newpage
+(Extra Page for Solution)
+\newpage
+
+
+\item
+{\bf Fast one-time signatures from discrete-log (20 points.)} Let $G$ be a group of prime order $q$ with
+generator $g$. Consider the following signature system for signing messages in $\mathbb{Z}_q$:
+\begin{itemize}
+\item $\mathsf{KeyGen:}$ Choose $x, y \leftarrow \mathbb{Z}_q$ (i.e. at random), set $h := g^x$  and $u := g^y$. Output $sk := (x, y)$ and $pk := (g, h, u) \in \mathbb{G}^3$.
+\item $\mathsf{Sign}(sk, m \in \mathbb{Z}_q):$ Output $s \in \mathbb{Z}_q$ such that $u = g^mh^s$.
+\item $\mathsf{Verify}(pk, m, s)$: Output ‘yes’ if $u = g^mh^s$ and ‘no’ otherwise.
+\end{itemize}
+
+\begin{enumerate}
+\item {\bf (5 points.)} Explain how the signing algorithm should work. That is, show how to find $s$ above using $sk$. Note that signing is super fast (i.e. you should not be solving hard computational problems in order to sign when given a signing key).
+\item {\bf (10 points.)} Show that the signature scheme is {\bf `selective' one-time secure} assuming the discrete-log problem in $\mathbb{G}$ is hard. 
+The `selective' one-time security game is defined as follows:
+the adversary $\mathcal{A}$ {\em first outputs a message $m \in \mathbb{Z}_q$} and in response is given the
+public key $pk$ and a valid signature $s$ on $m$ relative to $pk$. The adversary's
+goal is to output a signature forgery $(m^*, s^*)$ where $m \neq m^*$.
+
+Show how to use $\mathcal{A}$ to compute discrete-log in $\mathbb{G}$. This will prove that the signature is secure in the selective sense as long as the adversary sees at most one signature.
+[Recall that in the standard game defined in class the adversary is first given the
+public-key and only then outputs a message $m$. In the weaker security game above the adversary
+is forced to choose the message $m$ before seeing the public-key. The standard game
+from class gives the adversary more power and more accurately models the real world.]\\
+(Hint: Your goal is to construct a reduction/wrapper $B$ that given $g$ and random $h \in \mathbb{G}$ interacts with $\mathcal{A}$, and finally outputs an $x \in \mathbb{Z}_q$ such that $h = g^x$.)
+
+\item {\bf (5 points.)} Show that this signature scheme is not 2-time secure. Given a signature on two distinct messages $m_0, m_1 \in \mathbb{Z}_q$ show how to forge a signature for any other message $m \in \mathbb{Z}_q$.
+	\end{enumerate}
+	
+
+
+
+
+\newpage
+(Extra Page for Solution)
+
+\newpage
+(Extra Page for Solution)
+
+
+\newpage
+
+
+
+\newpage
+\item {\bf Conference key setup/multi-party key exchange (20 points).}
+Parties $A_1,\ldots, A_n$ and $B$ wish to generate a secret conference key. All parties should
+know the conference key, but an eavesdropper should not be able to obtain any information about the key. They decide to use the following variant of Diffie-Hellman: there is a public prime $p$ and a public element $g \in \mathbb{Z}_p^*$ of order $q$ for some large prime $q$
+dividing $p- 1$. 
+\begin{itemize}
+\item User $B$ picks a secret random $b \in [1, q - 1]$ and computes $y = g^b \in \mathbb{Z}_p^*$.
+Each party $A_i$ picks a secret random $a_i \in [1, q - 1]$ and computes $x_i = g^{a_i} \in \mathbb{Z}_p^*$.
+
+\item User $A_i$ sends $x_i$ to $B$. User $B$ responds to party $i$ by sending $z_i = x_i^{b_i} \in \mathbb{Z}_p^*$.
+\end{itemize}
+\begin{enumerate}
+\item {\bf (5 points). }Show that party $A_i$ given $z_i$ (and $a_i$) can determine $y$.
+\item {\bf (5 points).} Explain intuitively why (a hash of) $y$ can be securely used as the conference key. Namely,
+explain why at the end of the protocol all parties $A_1, \ldots, A_n$ and $B$ know $y$. 
+Give an informal explanation why you think an eavesdropper cannot determine $y$.
+\item {\bf (10 points).} Prove part (b). Namely, show that if there exists an efficient algorithm $A$ that
+given the public values in the above protocol, outputs $y$, then there also exists an
+efficient algorithm $B$ that breaks the Computational Diffie-Hellman assumption
+in the subgroup of $\mathbb{Z}_p^*$ generated by $g$. 
+Use algorithm $A$ as a subroutine in your
+algorithm $B$. Note that algorithm $A$ takes as input a triple $(g, g^x, g^y)$ and outputs
+$g^{x/y}$ while algorithm $B$ must take as input a triple $(g, g^{x}, g^{y})$ and output $g^{xy}$.  
+(Hint: You can assume that $A$ on input {\em every} triple $(\tilde{g}, \tilde{g}^{\widetilde{x}}, \tilde{g}^{\widetilde{y}})$ outputs
+$\tilde{g}^{\widetilde{x}/\widetilde{y}}$.)
+\end{enumerate}
+\end{enumerate}
+
+\newpage
+(Extra Page for Solution)
+
+\newpage
+(Extra Page for Solution)
+
+\vfill
+
+\paragraph{Feedback.} Did you find the homework assignments too easy/too hard/just right? How is the pace of the course so far? Please add any feedback about lectures and/or homework that would help improve the course.\newline\newline\newline\newline\newline\newline\newline\newline\newline\newline
+
+\paragraph{Acknowledgement:} Some questions are attributed to Dan Boneh and David Wu.
+\end{document}
