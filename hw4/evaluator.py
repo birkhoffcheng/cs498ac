@@ -23,6 +23,8 @@ class GarbledCircuitEvaluator(BooleanCircuit):
             gates = from_json["gates"]
 
             # TODO: your code goes here
+            for gid in gates: # gate ids
+                self.gates[gid]["garble_table"] = gates[gid]["garble_table"]
 
     def garbled_evaluate(self, inp):
         # Precondition: initialized, topologically sorted
@@ -40,6 +42,22 @@ class GarbledCircuitEvaluator(BooleanCircuit):
             self.wire_labels[wid] = label
 
         # TODO: Your code goes here
+        for gid in self.sorted_gates:
+            gate = self.gates[gid]
+
+            a = bytes.fromhex(self.wire_labels[gate["inp"][0]])
+            b = bytes.fromhex(self.wire_labels[gate["inp"][1]])
+
+            for cip in gate["garble_table"]:
+                c = bytes.fromhex(cip)
+                a_dec = util.specialDecryption(a, c)
+                if a_dec is None:
+                    continue
+                b_dec = util.specialDecryption(b, a_dec)
+                if b_dec is None:
+                    continue
+                self.wire_labels[gate["out"][0]] = b_dec.hex()
+                break
 
         return dict((wid,self.wire_labels[wid]) for wid in self.output_wires)
 
