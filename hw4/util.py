@@ -41,7 +41,11 @@ def specialEncryption(k, m):
     assert len(m) <= KEYLENGTH//8 * 3  # m must be bounded in size
 
     # TODO: Your code goes here
-    return pass
+    r = random_bytes(KEYLENGTH // 8)
+    prf = lengthQuadruplingPRF(k, r)
+    msg = (b'\0' * (KEYLENGTH // 8)) + m
+    cip = r + (b''.join( bytes([a^b]) for (a,b) in zip( msg, prf )))
+    return cip
 
 def specialDecryption(k, c):
     assert len(k) == KEYLENGTH//8
