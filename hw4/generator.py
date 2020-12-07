@@ -29,11 +29,34 @@ class GarbledCircuitGenerator(BooleanCircuit):
         self.wire_labels = {} # maps wire id to {"0":label0 ,"1": label1}
 
         # TODO: your code goes here
+        for wire in self.wires:
+            k0 = generate_key().hex()
+            k1 = generate_key().hex()
+            self.wire_labels[wire] = [k0, k1]
 
         # Generate garble tables
         self.garble_table = {}
 
         # TODO: your code goes here
+        for gid in self.sorted_gates:
+            gate = self.gates[gid]
+            in0 = gate["inp"][0]
+            in1 = gate["inp"][1]
+            out = gate["out"][0]
+            table = gate["table"]
+            garble_table = []
+            for i in range(len(table)):
+                in0_value = (i >> 1) & 1
+                in1_value = i & 1
+                in0_key = bytes.fromhex(self.wire_labels[in0][in0_value])
+                in1_key = bytes.fromhex(self.wire_labels[in1][in1_value])
+                out_key = bytes.fromhex(self.wire_labels[out][table[i]])
+                cip_inner = specialEncryption(in1_key, out_key)
+                cip_outer = specialEncryption(in0_key, cip_inner)
+                garble_table.append(cip_outer.hex())
+
+            shuffle(garble_table)
+            self.garble_table[gid] = garble_table
 
     def output(self, outfile, inputs=None, debug=True):
         # Save as a JSON file, with wire lables for debugging
